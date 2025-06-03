@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title> Skippy </title>
+
+    <style>
+        h1 {
+            Color : blue;
+            font-size: 120px;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            margin-top: 50px;
+            margin-bottom: 30px;
+        }
+        p1 {
+            margin-top: 20px;
+            color : plum;
+            font-size: 30px;
+            font-style: italic;
+            background-color: blanchedalmond;
+        }
+        ul{
+            color : lightslategray;
+            font-size: 20px;
+            font-weight: 700;
+        }
+        ul li{
+            color: #0FF;
+        }
+        .pink{
+            color: #F0F;
+        }
+
+        #demo {
+            color: darkgoldenrod;
+        }
+        /*this is a css comment*/
+    </style>
+</head>
+<body>
+    <h1> SKIPPY </h1>
+    <p> Dont skip the line, skip the wait!</p>
+
+
+    <h2>Reasons why im awesome</h2>
+    <ul>
+        <li class="pink">Because</li>
+    </ul>
+    
+    <a href="https://stake.com/fr">Click for a good time</a>
+    <br></br>
+    <p>
+        <a href = https://www.youtube.com/watch?v=dQw4w9WgXcQ> 
+        <img src="crocadillo.jpeg" alt="Sick as fuck crocodile" style="width:10% ; border-style: groove; border-radius: 200%;" title="Croc">
+        </a> 
+    </p>
+    <br></br>   
+    <p1 id="demo">Text here</p1>
+    <p2 id="bottom_text">
+        text
+    </p2>
+
+    <!-- Add a text form-->
+    <form>
+        <textarea id="input_name" rows="4" cols="50">
+
+        </textarea>
+    </form>
+
+    
+    <p><button id="super_secret_button">don't click me </button></p>
+    <p><button id="super_secret_button2">click me </button></p>
+    <script>
+        var x = true;
+        var size = 10;
+        document.getElementById("super_secret_button").addEventListener('click', function(){
+            console.log("Button Clicked!");
+            if(x){
+                document.getElementById("demo").innerHTML = "Fuck you.<br>";
+            }else{
+                document.getElementById("demo").innerHTML = "Love you.<br>";
+            }
+            x = !x;
+
+            
+            document.getElementById("demo").style.fontSize = size + "px";
+            size = size*1.1;
+
+            getData();
+        });
+        document.getElementById("super_secret_button2").addEventListener('click', function(){
+            console.log(document.getElementById("input_name").value);
+
+            sendData();
+        });
+    </script>
+
+    <!-- random text box to edit -->
+    <p id="web_data">
+        text
+    </p>
+    <script>
+        async function getData() {
+            const url = "http://innovatinsa.piwio.fr:80/get";
+            let response = await fetch(url);
+            // let json = await response.json();
+            // console.log(json);
+
+            //or
+            let response_as_text = await response.text();
+            // document.getElementById("web_data").innerHTML = JSON.stringify(json);
+            document.getElementById("web_data").innerHTML = response_as_text;
+        }
+        async function sendData() {
+            const url = "http://innovatinsa.piwio.fr:80/post";
+            let name = "John";
+            // ` lets you add variables inside it
+            // let response = await fetch(url, {
+            //     method: "POST",
+            //     body: `{"name": ${name}}`
+
+            // });
+            let response = await fetch(url, {
+                method: "POST",
+                body: document.getElementById("input_name").value
+
+            });
+            // let json = await response.json();
+            // console.log(json);
+
+            //or
+            let response_as_text = await response.text();
+            // document.getElementById("web_data").innerHTML = JSON.stringify(json);
+            document.getElementById("web_data").innerHTML = response_as_text;
+        }
+    </script>
+    <!-- Script Section -->
+    <script>
+        document.getElementById("demo").innerHTML = "Hello JavaScript!";
+    </script>
+
+    <!-- This is a html comment-->
+    <script>
+        var x = 1;
+        // this is a javascript comment
+        /* or this*/
+        // ctrl / or ctrl k + c
+        x = x*4;
+        var y = 2;
+
+        if(y >6){
+            x = 0
+        }else{
+            x = -1.6
+        }
+
+
+        for(var i = 0; i < 10; i++){
+            x = x+i;
+        }
+
+        var myArray = ["hello", "my", "fav", "color", "is", "green"];
+        let string = myArray[0];
+        for(var i = 1; i < myArray.length; i++){
+            string = string + "-" + myArray[i];
+        }
+        string += "<br>";
+
+        // or
+        let numbers = [1, 74, 9, 555, 21, 2, 5, 8];
+        let txt = "";
+        numbers.forEach(myFunction);
+
+        function myFunction(value) {
+            txt += value + "<br>";
+        }
+
+        document.getElementById("demo").innerHTML = string;
+        document.getElementById("bottom_text").innerHTML = txt;
+    </script>
+
+
+
+</body>
+</html>

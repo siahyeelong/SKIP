@@ -1,0 +1,5 @@
+PG_USERNAME="postgres"
+PG_PASSWORD="postgres"
+PG_HOST="localhost"
+PG_DB_NAME="postgres"
+PG_PORT="3004"
