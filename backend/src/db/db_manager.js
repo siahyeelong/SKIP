@@ -62,53 +62,12 @@ async function createTables() {
   try {
     await client.query("BEGIN");
 
-    const buildingsTableQuery = `CREATE TABLE IF NOT EXISTS buildings (
+    const attractionsTableQuery = `CREATE TABLE IF NOT EXISTS attractions (
       id SERIAL PRIMARY KEY,
       name VARCHAR NOT NULL,
-      geom geometry('POLYGON',4326,2)
+      waitTime float
       );`;
-    await client.query(buildingsTableQuery);
-
-    const roomsTableQuery = `CREATE TABLE IF NOT EXISTS rooms (
-      id SERIAL PRIMARY KEY,
-      name VARCHAR NOT NULL,
-      capacity INTEGER NOT NULL,
-      building_id INTEGER NOT NULL,
-      geom GEOMETRY('POLYGON',4326,2),
-      CONSTRAINT fk_rooms
-      FOREIGN KEY(building_id) 
-      REFERENCES buildings(id)
-      );`;
-    await client.query(roomsTableQuery);
-
-    const sensorTableQuery = `CREATE TABLE IF NOT EXISTS sensors(
-    id SERIAL PRIMARY KEY,
-    room_id INTEGER NOT NULL,
-    name VARCHAR NOT NULL,
-    temperature FLOAT,
-    FOREIGN KEY(room_id)
-    REFERENCES rooms(id)
-    );`;
-    await client.query(sensorTableQuery);
-
-    const measurementsTableQuery = `CREATE TABLE IF NOT EXISTS measurements(
-    entry_num SERIAL PRIMARY KEY,
-    sensor_id INTEGER NOT NULL,
-    value INTEGER NOT NULL,
-    timestamp DATE NOT NULL,
-    FOREIGN KEY(sensor_id)
-    REFERENCES sensors(id)
-    );`;
-    await client.query(measurementsTableQuery);
-
-    // new devices table
-    const devicesTableQuery = `CREATE TABLE IF NOT EXISTS devices(
-    id SERIAL PRIMARY KEY,
-    type TEXT NOT NULL,
-    geom GEOMETRY(POINT, 4326),
-    status TEXT
-    );`;
-    await client.query(devicesTableQuery);
+    await client.query(attractionsTableQuery);
 
     await client.query("COMMIT");
   } catch (e) {
@@ -118,47 +77,25 @@ async function createTables() {
   client.release();
 }
 
-async function populateRoomsAndBuildingsTablesIfEmpty() {
+async function populateAttractionsTablesIfEmpty() {
   const pool = new pg.Pool({
     connectionString: `postgres://${username}:${password}@${host}/${dbName}`,
   });
   const client = await pool.connect();
   try {
-    const resB = await client.query("SELECT count(*) FROM buildings");
-    const nbBuildings = parseInt(resB.rows[0].count, 10);
-
-    const resR = await client.query("SELECT count(*) FROM rooms");
-    const nbRooms = parseInt(resR.rows[0].count, 10);
+    const resB = await client.query("SELECT count(*) FROM attractions");
+    const nbAttractions = parseInt(resB.rows[0].count, 10);
 
     await client.query("BEGIN");
 
-    if (nbBuildings === 0) {
-      const buildingsNames = ["INSA Library", "INSA CS", "INSA ECE"];
-      const queryBuildings = "INSERT INTO buildings(name) VALUES ($1)";
-      for (const buildingName of buildingsNames) {
-        await client.query(queryBuildings, [buildingName]);
+    if (nbAttractions === 0) {
+      const attractionNames = ["Eiffel Tower", "The Louvre", "Arc de Triomphe"];
+      const queryAttractions = "INSERT INTO attractions(name) VALUES ($1)";
+      for (const attractionName of attractionNames) {
+        await client.query(queryAttractions, [attractionName]);
       }
     } else {
-      console.log("Buildings table already populated");
-    }
-
-    if (nbRooms === 0) {
-      const rooms = [
-        { name: "Amphitheatre", capacity: 140, building_id: 2 },
-        { name: "Laboratory", capacity: 25, building_id: 2 },
-        { name: "Classroom 1", capacity: 25, building_id: 2 },
-      ];
-      const queryRooms =
-        "INSERT INTO rooms(name, capacity, building_id) VALUES ($1,$2,$3)";
-      for (const room of rooms) {
-        await client.query(queryRooms, [
-          room.name,
-          room.capacity,
-          room.building_id,
-        ]);
-      }
-    } else {
-      console.log("Rooms table already populated");
+      console.log("Attractions table already populated");
     }
 
     await client.query("COMMIT");
@@ -204,7 +141,7 @@ export {
   addPostgisToDb,
   createTables,
   dropTables,
-  populateRoomsAndBuildingsTablesIfEmpty,
+  populateAttractionsTablesIfEmpty,
   updateGeomProjection,
   query,
 };

@@ -1,184 +1,159 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <title> Skippy </title>
+<html lang="en">
 
+<head>
+    <title>Skippy - Paris Attractions</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap" rel="stylesheet">
     <style>
-        h1 {
-            Color : blue;
-            font-size: 120px;
-            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-            margin-top: 50px;
-            margin-bottom: 30px;
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: #fff;
+            color: #222;
         }
-        p1 {
-            margin-top: 20px;
-            color : plum;
-            font-size: 30px;
-            font-style: italic;
-            background-color: blanchedalmond;
+
+        header {
+            background: #22223b;
+            color: #fff;
+            padding: 24px 0 16px 0;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         }
-        ul{
-            color : lightslategray;
-            font-size: 20px;
+
+        header h1 {
+            margin: 0;
+            font-size: 14vw;
+            letter-spacing: 2px;
             font-weight: 700;
         }
-        ul li{
-            color: #0FF;
-        }
-        .pink{
-            color: #F0F;
+
+        nav {
+            margin-top: 12px;
         }
 
-        #demo {
-            color: darkgoldenrod;
+        nav a {
+            color: #c9ada7;
+            text-decoration: none;
+            margin: 0 18px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: color 0.2s;
         }
-        /*this is a css comment*/
+
+        nav a:hover {
+            color: #9a8c98;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 40px auto 0 auto;
+            padding: 0 20px;
+        }
+
+        h2 {
+            color: #22223b;
+            font-size: 2rem;
+            margin-top: 32px;
+            margin-bottom: 16px;
+        }
+
+        ul.attractions {
+            color: #4a4e69;
+            font-size: 1.1rem;
+            font-weight: 500;
+            padding-left: 24px;
+            list-style-type: disc;
+        }
+
+        ul.attractions li {
+            color: #22223b;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .accent {
+            color: #c9ada7;
+        }
+
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            main {
+                padding: 0 8px;
+            }
+        }
     </style>
 </head>
+
 <body>
-    <h1> SKIPPY </h1>
-    <p> Dont skip the line, skip the wait!</p>
-
-
-    <h2>Reasons why im awesome</h2>
-    <ul>
-        <li class="pink">Because</li>
-    </ul>
-    
-    <a href="https://stake.com/fr">Click for a good time</a>
-    <br></br>
-    <p>
-        <a href = https://www.youtube.com/watch?v=dQw4w9WgXcQ> 
-        <img src="crocadillo.jpeg" alt="Sick as fuck crocodile" style="width:10% ; border-style: groove; border-radius: 200%;" title="Croc">
-        </a> 
-    </p>
-    <br></br>   
-    <p1 id="demo">Text here</p1>
-    <p2 id="bottom_text">
-        text
-    </p2>
-
-    <!-- Add a text form-->
-    <form>
-        <textarea id="input_name" rows="4" cols="50">
-
-        </textarea>
-    </form>
-
-    
-    <p><button id="super_secret_button">don't click me </button></p>
-    <p><button id="super_secret_button2">click me </button></p>
-    <script>
-        var x = true;
-        var size = 10;
-        document.getElementById("super_secret_button").addEventListener('click', function(){
-            console.log("Button Clicked!");
-            if(x){
-                document.getElementById("demo").innerHTML = "Fuck you.<br>";
-            }else{
-                document.getElementById("demo").innerHTML = "Love you.<br>";
-            }
-            x = !x;
-
-            
-            document.getElementById("demo").style.fontSize = size + "px";
-            size = size*1.1;
-
-            getData();
-        });
-        document.getElementById("super_secret_button2").addEventListener('click', function(){
-            console.log(document.getElementById("input_name").value);
-
-            sendData();
-        });
-    </script>
-
-    <!-- random text box to edit -->
-    <p id="web_data">
-        text
-    </p>
-    <script>
-        async function getData() {
-            const url = "http://innovatinsa.piwio.fr:80/get";
-            let response = await fetch(url);
-            // let json = await response.json();
-            // console.log(json);
-
-            //or
-            let response_as_text = await response.text();
-            // document.getElementById("web_data").innerHTML = JSON.stringify(json);
-            document.getElementById("web_data").innerHTML = response_as_text;
-        }
-        async function sendData() {
-            const url = "http://innovatinsa.piwio.fr:80/post";
-            let name = "John";
-            // ` lets you add variables inside it
-            // let response = await fetch(url, {
-            //     method: "POST",
-            //     body: `{"name": ${name}}`
-
-            // });
-            let response = await fetch(url, {
-                method: "POST",
-                body: document.getElementById("input_name").value
-
+    <header>
+        <h1>SKIPPY</h1>
+        <nav>
+            <a href="#">Accueil</a>
+            <a href="#">Musées</a>
+            <a href="#">Billets</a>
+            <a href="#">Contact</a>
+        </nav>
+    </header>
+    <main>
+        <h2>Historical Sites of Paris</h2>
+        <label for="attraction-search" style="font-weight:600;">Search for a site:</label>
+        <input type="text" id="attraction-search" placeholder="Type to search..."
+            style="width:100%;padding:10px;margin:12px 0 20px 0;font-size:1rem;border-radius:8px;border:1px solid #c9ada7;">
+        <select id="attraction-dropdown"
+            style="width:100%;padding:12px;font-size:1.1rem;border-radius:8px;border:1px solid #c9ada7;">
+            <option value="">-- Select a site --</option>
+            <option>Tour Eiffel</option>
+            <option>Musée du Louvre</option>
+            <option>Cathédrale Notre-Dame de Paris</option>
+            <option>Basilique du Sacré-Cœur</option>
+            <option>Arc de Triomphe</option>
+            <option>Musée d'Orsay</option>
+            <option>Château de Versailles</option>
+            <option>Panthéon</option>
+            <option>Opéra Garnier</option>
+            <option>Place de la Concorde</option>
+            <option>Jardin du Luxembourg</option>
+            <option>Les Invalides</option>
+            <option>Centre Pompidou</option>
+            <option>Montmartre</option>
+            <option>Palais Royal</option>
+            <option>Place des Vosges</option>
+            <option>La Sainte-Chapelle</option>
+            <option>Grand Palais</option>
+            <option>Petit Palais</option>
+            <option>Musée Rodin</option>
+            <option>Musée de l'Orangerie</option>
+            <option>Parc des Buttes-Chaumont</option>
+            <option>Parc Monceau</option>
+            <option>La Conciergerie</option>
+            <option>Le Marais</option>
+            <option>Île de la Cité</option>
+            <option>Île Saint-Louis</option>
+            <option>La Défense (Grande Arche)</option>
+            <option>Palais de Tokyo</option>
+            <option>Musée Picasso</option>
+        </select>
+        <script>
+            const searchInput = document.getElementById('attraction-search');
+            const dropdown = document.getElementById('attraction-dropdown');
+            const allOptions = Array.from(dropdown.options).slice(1); // skip placeholder
+            searchInput.addEventListener('input', function () {
+                const filter = searchInput.value.toLowerCase();
+                dropdown.innerHTML = '<option value="">-- Select a site --</option>';
+                allOptions.forEach(opt => {
+                    if (opt.text.toLowerCase().includes(filter)) {
+                        dropdown.appendChild(opt.cloneNode(true));
+                    }
+                });
             });
-            // let json = await response.json();
-            // console.log(json);
-
-            //or
-            let response_as_text = await response.text();
-            // document.getElementById("web_data").innerHTML = JSON.stringify(json);
-            document.getElementById("web_data").innerHTML = response_as_text;
-        }
-    </script>
-    <!-- Script Section -->
-    <script>
-        document.getElementById("demo").innerHTML = "Hello JavaScript!";
-    </script>
-
-    <!-- This is a html comment-->
-    <script>
-        var x = 1;
-        // this is a javascript comment
-        /* or this*/
-        // ctrl / or ctrl k + c
-        x = x*4;
-        var y = 2;
-
-        if(y >6){
-            x = 0
-        }else{
-            x = -1.6
-        }
-
-
-        for(var i = 0; i < 10; i++){
-            x = x+i;
-        }
-
-        var myArray = ["hello", "my", "fav", "color", "is", "green"];
-        let string = myArray[0];
-        for(var i = 1; i < myArray.length; i++){
-            string = string + "-" + myArray[i];
-        }
-        string += "<br>";
-
-        // or
-        let numbers = [1, 74, 9, 555, 21, 2, 5, 8];
-        let txt = "";
-        numbers.forEach(myFunction);
-
-        function myFunction(value) {
-            txt += value + "<br>";
-        }
-
-        document.getElementById("demo").innerHTML = string;
-        document.getElementById("bottom_text").innerHTML = txt;
-    </script>
-
-
-
+        </script>
+    </main>
 </body>
+
 </html>

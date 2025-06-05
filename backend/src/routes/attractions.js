@@ -8,55 +8,40 @@ router.get("/test", async (req, res) => {
   res.send("hello bitch");
 });
 
-// get building by id
+// get all attractions
+router.get("/", async (req, res) => {
+  const { rows } = await query(
+    "SELECT id, name, waitTime FROM attractions"
+  );
+  if (rows.length === 0) {
+    return res.status(404).send("No attractions found");
+  }
+  res.send(rows);
+});
+
+// get attraction information by id
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
   const { rows } = await query(
-    "SELECT id, name, ST_AsGeoJson(St_transform(geom,4326)) geom FROM buildings WHERE id = $1",
-    [id]
+    "SELECT name, waitTime FROM attractions WHERE id = $1", [id]
   );
   if (rows.length === 0) {
-    res.sendStatus(404);
-    return;
+    return res.status(404).send("Attraction not found");
   }
   res.send(rows[0]);
 });
 
-// insert building record
-router.post("/", async (req, res) => {
-  const { body } = req;
-  if (body.name === undefined) {
-    res.sendStatus(400);
-  } else {
-    await query("INSERT INTO buildings (name) VALUES ($1)", [body.name]);
-    res.sendStatus(200);
-  }
-});
+// get attraction information by name
 
-// delete building by id
-router.delete("/:id", async (req, res) => {
+// simulate wait time update with a random wait time generated
+router.post("/updateWaitTime/:id", async (req, res) => {
   const { id } = req.params;
-  await query("DELETE FROM buildings WHERE id = $1", [id]);
-  res.sendStatus(200);
-});
-
-// update building by id
-router.patch("/:id", async (req, res) => {
-  const { id } = req.params;
-  const { body } = req;
-  if (body.name === undefined) {
-    res.sendStatus(400);
-  } else {
-    const { rows } = await query(
-      "UPDATE buildings SET name = $1 WHERE id = $2 RETURNING *",
-      [body.name, id]
-    );
-    if (rows.length === 0) {
-      res.sendStatus(400);
-      return;
-    }
-    res.sendStatus(200);
-  }
+  const newWaitTime = Math.floor(Math.random() * 100); // Random wait time between 0 and 99
+  await query(
+    "UPDATE attractions SET waitTime = $1 WHERE id = $2",
+    [newWaitTime, id]
+  );
+  res.send({ message: "Wait time updated", newWaitTime });
 });
 
 export { router as default };
