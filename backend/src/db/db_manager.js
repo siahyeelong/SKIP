@@ -43,9 +43,9 @@ async function dropTables() {
   try {
     await client.query("BEGIN");
 
-    let dropTablesQuery = `DROP TABLE IF EXISTS attractions CASCADE; `;
+    let dropTablesQuery = `DROP TABLE IF EXISTS attractions CASCADE; DROP TABLE IF EXISTS measurements CASCADE; `;
     await client.query(dropTablesQuery);
-
+    
     await client.query("COMMIT");
   } catch (e) {
     await client.query("ROLLBACK");
@@ -65,7 +65,14 @@ async function createTables() {
     const attractionsTableQuery = `CREATE TABLE IF NOT EXISTS attractions (
       id SERIAL PRIMARY KEY,
       name VARCHAR NOT NULL,
-      waitTime float
+      waitTime float,
+      description TEXT
+      );
+      CREATE TABLE IF NOT EXISTS measurements (
+      id SERIAL PRIMARY KEY,
+      attraction_id INTEGER NOT NULL REFERENCES attractions(id),
+      waittime float NOT NULL,
+      timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );`;
     await client.query(attractionsTableQuery);
 
@@ -89,7 +96,7 @@ async function populateAttractionsTablesIfEmpty() {
     await client.query("BEGIN");
 
     if (nbAttractions === 0) {
-      const attractionNames = ["Eiffel Tower", "The Louvre", "Arc de Triomphe"];
+      const attractionNames = ["Tour Eiffel", "Musée du Louvre", "Cathédrale Notre-Dame de Paris"];
       const queryAttractions = "INSERT INTO attractions(name) VALUES ($1)";
       for (const attractionName of attractionNames) {
         await client.query(queryAttractions, [attractionName]);

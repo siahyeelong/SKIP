@@ -3,9 +3,13 @@
 
 <head>
     <title>Skippy - Paris Attractions</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap" rel="stylesheet" />
+    <!-- Materialize CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet" />
+    <!-- Custom Style -->
     <style>
         body {
             margin: 0;
@@ -60,14 +64,6 @@
             margin-bottom: 16px;
         }
 
-        ul.attractions {
-            color: #4a4e69;
-            font-size: 1.1rem;
-            font-weight: 500;
-            padding-left: 24px;
-            list-style-type: disc;
-        }
-
         ul.attractions li {
             color: #22223b;
             margin-bottom: 10px;
@@ -94,66 +90,118 @@
     <header>
         <h1>SKIPPY</h1>
         <nav>
-            <a href="#">Accueil</a>
+            <a href="welcome.html">Welcome</a>
             <a href="#">Musées</a>
             <a href="#">Billets</a>
             <a href="#">Contact</a>
         </nav>
     </header>
+
     <main>
         <h2>Historical Sites of Paris</h2>
-        <label for="attraction-search" style="font-weight:600;">Search for a site:</label>
-        <input type="text" id="attraction-search" placeholder="Type to search..."
-            style="width:100%;padding:10px;margin:12px 0 20px 0;font-size:1rem;border-radius:8px;border:1px solid #c9ada7;">
-        <select id="attraction-dropdown"
-            style="width:100%;padding:12px;font-size:1.1rem;border-radius:8px;border:1px solid #c9ada7;">
+        <div class="input-field">
+            <input type="text" id="attraction-search" class="autocomplete" placeholder="Type to search..." />
+            <label for="attraction-search">Search for a site</label>
+        </div>
+
+        <select id="attraction-dropdown" class="browser-default" style="margin-top: 20px;">
             <option value="">-- Select a site --</option>
-            <option>Tour Eiffel</option>
-            <option>Musée du Louvre</option>
-            <option>Cathédrale Notre-Dame de Paris</option>
-            <option>Basilique du Sacré-Cœur</option>
-            <option>Arc de Triomphe</option>
-            <option>Musée d'Orsay</option>
-            <option>Château de Versailles</option>
-            <option>Panthéon</option>
-            <option>Opéra Garnier</option>
-            <option>Place de la Concorde</option>
-            <option>Jardin du Luxembourg</option>
-            <option>Les Invalides</option>
-            <option>Centre Pompidou</option>
-            <option>Montmartre</option>
-            <option>Palais Royal</option>
-            <option>Place des Vosges</option>
-            <option>La Sainte-Chapelle</option>
-            <option>Grand Palais</option>
-            <option>Petit Palais</option>
-            <option>Musée Rodin</option>
-            <option>Musée de l'Orangerie</option>
-            <option>Parc des Buttes-Chaumont</option>
-            <option>Parc Monceau</option>
-            <option>La Conciergerie</option>
-            <option>Le Marais</option>
-            <option>Île de la Cité</option>
-            <option>Île Saint-Louis</option>
-            <option>La Défense (Grande Arche)</option>
-            <option>Palais de Tokyo</option>
-            <option>Musée Picasso</option>
         </select>
-        <script>
+        <div id="attraction-cards" style="margin-top:40px;"></div>
+    </main>
+
+    <!-- Materialize JS + Initialization -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
             const searchInput = document.getElementById('attraction-search');
             const dropdown = document.getElementById('attraction-dropdown');
-            const allOptions = Array.from(dropdown.options).slice(1); // skip placeholder
-            searchInput.addEventListener('input', function () {
-                const filter = searchInput.value.toLowerCase();
-                dropdown.innerHTML = '<option value="">-- Select a site --</option>';
-                allOptions.forEach(opt => {
-                    if (opt.text.toLowerCase().includes(filter)) {
-                        dropdown.appendChild(opt.cloneNode(true));
-                    }
+            const cardsContainer = document.getElementById('attraction-cards');
+
+            fetch('http://innovatinsa.piwio.fr:3004/attractions/')
+                .then(res => res.json())
+                .then(data => {
+                    const dataMap = {};
+                    data.forEach(attraction => {
+                        dataMap[attraction.name] = null; // Materialize expects { "Key": null }
+                        const option = document.createElement('option');
+                        option.value = attraction.name;
+                        option.textContent = attraction.name;
+                        dropdown.appendChild(option);
+                        populateCards(data);
+                    });
+
+                    M.Autocomplete.init(searchInput, {
+                        data: dataMap,
+                        minLength: 1,
+                        onAutocomplete: function (val) {
+                            // Optional: do something on selection
+                            dropdown.value = val;
+                        }
+                    });
+                })
+                .catch(err => console.error('Error loading attractions:', err));
+
+            function populateCards(attractions) {
+                cardsContainer.innerHTML = '';
+                attractions.forEach((attraction, index) => {
+                    const card = document.createElement('div');
+                    card.style.border = '1px solid #c9ada7';
+                    card.style.borderRadius = '12px';
+                    card.style.marginBottom = '24px';
+                    card.style.padding = '16px';
+                    card.style.display = 'flex';
+                    card.style.alignItems = 'center';
+                    card.style.justifyContent = 'space-between';
+                    card.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)';
+
+                    // Left side: image + text
+                    const leftContainer = document.createElement('div');
+                    leftContainer.style.display = 'flex';
+                    leftContainer.style.alignItems = 'center';
+                    leftContainer.style.gap = '16px';
+
+                    const img = document.createElement('img');
+                    img.src = `./assets/${attraction.id}.jpg`;
+                    img.alt = attraction.name;
+                    img.style.width = '120px';
+                    img.style.height = '80px';
+                    img.style.objectFit = 'cover';
+                    img.style.borderRadius = '8px';
+
+                    const textContainer = document.createElement('div');
+                    const title = document.createElement('h3');
+                    title.textContent = attraction.name;
+                    title.style.margin = '0 0 8px 0';
+                    title.style.color = '#22223b';
+
+                    const desc = document.createElement('p');
+                    desc.textContent = attraction.description;
+                    desc.style.margin = '0';
+                    desc.style.color = '#4a4e69';
+
+                    textContainer.appendChild(title);
+                    textContainer.appendChild(desc);
+
+                    leftContainer.appendChild(img);
+                    leftContainer.appendChild(textContainer);
+
+                    // Right side: number
+                    const waitTime = document.createElement('div');
+                    waitTime.textContent = `${attraction.waittime} h`;
+                    // waitTime.style.fontSize = '2.5rem';
+                    waitTime.style.fontWeight = '700';
+                    waitTime.style.color = '#9a8c98';
+                    waitTime.style.marginLeft = '20px';
+
+                    card.appendChild(leftContainer);
+                    card.appendChild(waitTime);
+                    cardsContainer.appendChild(card);
                 });
-            });
-        </script>
-    </main>
+            }
+
+        });
+    </script>
 </body>
 
 </html>

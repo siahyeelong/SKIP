@@ -7,6 +7,7 @@ import {
   populateAttractionsTablesIfEmpty,
 } from "./db/db_manager.js";
 import routes from "./routes/index.js";
+import mqttClient from './mqtt/mqtt_client.js';
 
 const app = express();
 
