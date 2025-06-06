@@ -55,14 +55,14 @@ router.post('/', async (req, res) => {
 });
 
 // simulate wait time update with a random wait time generated
-router.post("/updateWaitTime/:id", async (req, res) => {
-  const { id } = req.params;
-  const newWaitTime = Math.floor(Math.random() * 100); // Random wait time between 0 and 99
-  await query(
-    "UPDATE attractions SET waitTime = $1 WHERE id = $2",
-    [newWaitTime, id]
-  );
-  res.send({ message: "Wait time updated", newWaitTime });
-});
+// router.post("/updateWaitTime/:id", async (req, res) => {
+//   const { id } = req.params;
+//   const newWaitTime = Math.floor(Math.random() * 100); // Random wait time between 0 and 99
+//   await query(
+//     "UPDATE attractions SET waitTime = $1 WHERE id = $2",
+//     [newWaitTime, id]
+//   );
+//   res.send({ message: "Wait time updated", newWaitTime });
+// });
 
 export { router as default };
