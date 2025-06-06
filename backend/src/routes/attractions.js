@@ -11,10 +11,21 @@ router.get("/test", async (req, res) => {
 // get all attractions
 router.get("/", async (req, res) => {
   const { rows } = await query(
-    "SELECT id, name, waitTime, description FROM attractions"
+    "SELECT * FROM attractions"
   );
   if (rows.length === 0) {
     return res.status(404).send("No attractions found");
+  }
+  res.send(rows);
+});
+
+// get all historical data
+router.get("/history", async (req, res) => {
+  const { rows } = await query(
+    "SELECT * FROM measurements"
+  );
+  if (rows.length === 0) {
+    return res.status(404).send("No historical data found");
   }
   res.send(rows);
 });
@@ -31,8 +42,19 @@ router.get("/:id", async (req, res) => {
   res.send(rows[0]);
 });
 
-// get attraction information by name
+// get historical data by attraction id
+router.get("/:id/history", async (req, res) => {
+  const { id } = req.params;
+  const { rows } = await query(
+    "SELECT id, waittime, timestamp FROM measurements WHERE attraction_id = $1", [id]
+  );
+  if (rows.length === 0) {
+    return res.status(404).send("No historical data found");
+  }
+  res.send(rows);
+});
 
+// add a new attraction or update description
 router.post('/', async (req, res) => {
   const { body } = req;
   if (body.name == undefined) {

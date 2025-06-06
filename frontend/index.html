@@ -10,6 +10,8 @@
     <!-- Materialize CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet" />
     <!-- Custom Style -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
     <style>
         body {
             margin: 0;
@@ -92,8 +94,8 @@
         <nav>
             <a href="welcome.html">Welcome</a>
             <a href="#">Musées</a>
-            <a href="#">Billets</a>
-            <a href="#">Contact</a>
+            <a href="billets.html">Billets</a>
+            <a href="contact.html">Contact</a>
         </nav>
     </header>
 
@@ -107,6 +109,13 @@
         <select id="attraction-dropdown" class="browser-default" style="margin-top: 20px;">
             <option value="">-- Select a site --</option>
         </select>
+        <a id="sort-waittime-btn" class="waves-effect waves-light btn" style="margin-top: 40px;">
+            <i class="material-icons left">filter_list</i>
+            <span id="sort-label">
+                Sort by Wait Time
+            </span>
+        </a>
+
         <div id="attraction-cards" style="margin-top:40px;"></div>
         <div id="modal" style="
             display:none;
@@ -133,10 +142,11 @@
                     position:absolute;
                     top:12px;
                     right:16px;
-                    background:none;
+                    background: none;
                     border:none;
                     font-size:1.5rem;
                     cursor:pointer;
+                    color: rgb(190, 4, 4);
                 ">&times;</button>
                 <img id="modal-image" src="" alt=""
                     style="width:100%;height:auto;border-radius:8px;max-height:300px;object-fit:cover;">
@@ -145,7 +155,9 @@
                 <hr class="rounded">
                 <h6 style="color: rgb(96, 96, 96);font-size: smaller;">Current estimated waiting time:</h5>
 
-                    <h2 id="modal-waittime" style="color: #3a3858;font-weight:700;;"></h2>
+                    <h2 id="modal-waittime" style="color: #3a3858;font-weight:700; margin-top: 0;"></h2>
+                    <canvas id="waitTimeChart" width="400" height="200"></canvas>
+
 
             </div>
         </div>
@@ -154,24 +166,26 @@
 
     <!-- Materialize JS + Initialization -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const searchInput = document.getElementById('attraction-search');
             const dropdown = document.getElementById('attraction-dropdown');
             const cardsContainer = document.getElementById('attraction-cards');
             let allAttractions = [];
+            let waitTimeChart = null;
+
 
             const modal = document.getElementById('modal');
             const modalClose = document.getElementById('modal-close');
-
-
-
 
             fetch('http://innovatinsa.piwio.fr:3004/attractions/')
                 .then(res => res.json())
                 .then(data => {
                     allAttractions = data;
                     const dataMap = {};
+                    data.sort((a, b) => a.name.localeCompare(b.name)); // Sort by name
                     data.forEach(attraction => {
                         dataMap[attraction.name] = null; // Materialize expects { "Key": null }
                         const option = document.createElement('option');
@@ -192,7 +206,30 @@
                 })
                 .catch(err => console.error('Error loading attractions:', err));
 
+            let sortByWaitTime = false;
+
+            document.getElementById('sort-waittime-btn').addEventListener('click', () => {
+                sortByWaitTime = !sortByWaitTime;
+
+                const sorted = [...allAttractions].sort((a, b) => {
+                    if (sortByWaitTime) {
+                        return (a.waittime ?? Infinity) - (b.waittime ?? Infinity);
+                    } else {
+                        return a.name.localeCompare(b.name);
+                    }
+                });
+
+                document.getElementById('sort-label').textContent = sortByWaitTime
+                    ? 'Sort by Name'
+                    : 'Sort by Wait Time';
+
+                populateCards(sorted);
+            });
+
+
+
             function populateCards(attractions) {
+
                 cardsContainer.innerHTML = '';
                 attractions.forEach((attraction, index) => {
                     const card = document.createElement('div');
@@ -251,17 +288,14 @@
 
                     card.style.cursor = 'pointer';
                     card.addEventListener('click', () => {
-                        document.getElementById('modal-image').src = imagePath;
-                        document.getElementById('modal-image').alt = attraction.name;
-                        document.getElementById('modal-title').textContent = attraction.name;
-                        document.getElementById('modal-description').textContent = attraction.description;
-                        document.getElementById('modal-waittime').textContent = waitTimeText;
-                        document.getElementById('modal').style.display = 'flex';
+                        showModal(attraction);
                     });
 
                     cardsContainer.appendChild(card);
                 });
             }
+
+
 
             dropdown.addEventListener('change', () => {
                 const selectedName = dropdown.value;
@@ -271,17 +305,15 @@
                 if (selectedAttraction) showModal(selectedAttraction);
             });
 
-            searchInput.addEventListener('input', function () {
-                const filter = searchInput.value.toLowerCase();
-                dropdown.innerHTML = '<option value="">-- Select a site --</option>';
-                allAttractions.forEach(attraction => {
-                    if (attraction.name.toLowerCase().includes(filter)) {
-                        const opt = document.createElement('option');
-                        opt.text = attraction.name;
-                        dropdown.appendChild(opt);
-                    }
-                });
+            searchInput.addEventListener('change', function () {
+                const val = searchInput.value;
+                const selectedAttraction = allAttractions.find(a => a.name === val);
+                if (selectedAttraction) {
+                    dropdown.value = val;
+                    showModal(selectedAttraction);
+                }
             });
+
 
             function showModal(attraction) {
                 const modal = document.getElementById('modal');
@@ -291,18 +323,72 @@
                 document.getElementById('modal-description').textContent = attraction.description;
                 document.getElementById('modal-waittime').textContent = formatTime(attraction.waittime);
                 modal.style.display = 'flex';
+
+                let hours = [];
+                let historicalWaitTime = [];
+                fetch(`http://innovatinsa.piwio.fr:3004/attractions/${attraction.id}/history`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const averageTimes = averageWaitTimesByHour(data)
+                        hours = Object.keys(averageTimes).sort();
+                        historicalWaitTime = hours.map(hour => averageTimes[hour]);
+                    })
+                    .then(() => {
+                        if (hours.length === 0 || historicalWaitTime.length === 0) {
+                            document.getElementById('waitTimeChart').style.display = 'none';
+                            return;
+                        } else {
+                            document.getElementById('waitTimeChart').style.display = 'block';
+
+                            const ctx = document.getElementById('waitTimeChart').getContext('2d');
+
+                            // Destroy previous chart if exists
+                            if (waitTimeChart !== null) {
+                                waitTimeChart.destroy();
+                            }
+
+                            waitTimeChart = new Chart(ctx, {
+                                type: 'bar',
+                                data: {
+                                    labels: hours,
+                                    datasets: [{
+                                        label: 'Wait Time (min)',
+                                        data: historicalWaitTime,
+                                        borderColor: '#9a8c98',
+                                        backgroundColor: 'rgba(102, 51, 153, 0.3)',
+                                        fill: true,
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true,
+                                            title: { display: true, text: 'Minutes' }
+                                        },
+                                        x: {
+                                            title: { display: true, text: 'Hour of Day' }
+                                        }
+                                    }
+                                }
+                            });
+                        }
+
+                    })
+                    .catch(err => {
+                        console.error('Error fetching history:', err);
+                        waitTimeChart.destroy();
+                    });
             }
 
-            modalClose.addEventListener('click', () => {
-                modal.style.display = 'none';
-            });
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
                     modal.style.display = 'none';
                 }
             });
-
-
+            modalClose.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
 
             function formatTime(time) {
                 if (time === null) return '';
@@ -314,6 +400,35 @@
                     return `${time} min`;
                 }
             }
+
+            function averageWaitTimesByHour(data) {
+                const hourlyData = {};
+
+                data.forEach(entry => {
+                    const timestamp = new Date(entry.timestamp);
+                    const hour = timestamp.getUTCHours(); // or getHours() if timestamps are local
+                    const hourKey = hour < 10 ? `0${hour}00` : `${hour}00`;
+
+                    if (entry.waittime !== null) {
+                        if (!hourlyData[hourKey]) {
+                            hourlyData[hourKey] = { total: 0, count: 0 };
+                        }
+
+                        hourlyData[hourKey].total += entry.waittime;
+                        hourlyData[hourKey].count += 1;
+                    }
+                });
+
+                // Convert sums to averages
+                const result = {};
+                for (const hour in hourlyData) {
+                    const { total, count } = hourlyData[hour];
+                    result[hour] = count > 0 ? total / count : 0;
+                }
+
+                return result;
+            }
+
 
         });
     </script>

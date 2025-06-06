@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Tickets - Skippy</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: #fff;
+            color: #222;
+        }
+        header {
+            background: #22223b;
+            color: #fff;
+            padding: 24px 0 16px 0;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        header h1 {
+            margin: 0;
+            font-size: 14vw;
+            letter-spacing: 2px;
+            font-weight: 700;
+        }
+        nav {
+            margin-top: 12px;
+        }
+        nav a {
+            color: #c9ada7;
+            text-decoration: none;
+            margin: 0 18px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: color 0.2s;
+        }
+        nav a:hover {
+            color: #9a8c98;
+        }
+        main {
+            max-width: 800px;
+            margin: 40px auto 0 auto;
+            padding: 0 20px;
+        }
+        h2 {
+            color: #22223b;
+            font-size: 2rem;
+            margin-top: 32px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        ul.tickets {
+            color: #22223b;
+            font-size: 1.2rem;
+            font-weight: 500;
+            padding-left: 0;
+            list-style-type: none;
+        }
+        ul.tickets li {
+            margin-bottom: 18px;
+            background: #f2e9e4;
+            border-radius: 8px;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+        ul.tickets a {
+            color: #c9ada7;
+            font-weight: 700;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        ul.tickets a:hover {
+            color: #22223b;
+            text-decoration: underline;
+        }
+        @media (max-width: 600px) {
+            header h1 { font-size: 2.5rem; }
+            main { padding: 0 8px; }
+            h2 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><a href="index.html" style="color:inherit; text-decoration:none;">SKIPPY</a></h1>
+        <nav>
+            <a href="welcome.html">Welcome</a>
+            <a href="index.html">Musées</a>
+            <a href="#">Billets</a>
+            <a href="contact.html">Contact</a>
+        </nav>
+    </header>
+    <main>
+        <h2>Paris Museum Tickets</h2>
+        <ul class="tickets">
+            <li>Musée du Louvre <a href="https://ticket.louvre.fr/en/billetterie/3313" target="_blank">Buy Tickets</a></li>
+            <li>Musée d'Orsay <a href="https://billetterie.musee-orsay.fr/en-GB/home" target="_blank">Buy Tickets</a></li>
+            <li>Centre Pompidou <a href="https://www.centrepompidou.fr/fr/billetterie" target="_blank">Buy Tickets</a></li>
+            <li>Musée Rodin <a href="https://musee-rodin.tickeasy.com/fr-FR/produits?famille=1726956406350300003" target="_blank">Buy Tickets</a></li>
+            <li>Musée de l'Orangerie <a href="https://billetterie.musee-orangerie.fr/fr-FR/accueil-orangerie" target="_blank">Buy Tickets</a></li>
+            <li>Musée Picasso <a href="https://billetterie.museepicassoparis.fr/content" target="_blank">Buy Tickets</a></li>
+            <li>Petit Palais <a href="https://www.billetterie-parismusees.paris.fr/content#" target="_blank">Buy Tickets</a></li>
+            <li>Grand Palais <a href="https://www.grandpalais.fr/fr/les-abonnements#pass-grandpalais" target="_blank">Buy Tickets</a></li>
+            <li>Musée Carnavalet <a href="https://www.carnavalet.paris.fr/en/tickets" target="_blank">Buy Tickets</a></li>
+            <li>Musée Jacquemart-André <a href="https://www.musee-jacquemart-andre.com/en/tickets" target="_blank">Buy Tickets</a></li>
+            <li>Musée du Quai Branly <a href="https://www.quaibranly.fr/en/tickets/" target="_blank">Buy Tickets</a></li>
+            <li>Musée des Arts Décoratifs <a href="https://billetterie.madparis.fr/fr-FR/accueil" target="_blank">Buy Tickets</a></li>
+            <li>Musée Marmottan Monet <a href="https://www.marmottan.fr/en/tickets/" target="_blank">Buy Tickets</a></li>
+        </ul>
+    </main>
+</body>
+</html>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Welcome - Skippy</title>
+    <title>Contact Us - Skippy</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap" rel="stylesheet">
@@ -54,10 +54,31 @@
             margin-top: 32px;
             margin-bottom: 16px;
         }
-        p {
-            color: #4a4e69;
-            font-size: 1.1rem;
-            margin-bottom: 32px;
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 32px;
+        }
+        label {
+            align-self: flex-start;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #22223b;
+        }
+        input, textarea {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px;
+            margin-bottom: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+            color: #222;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 120px;
         }
         .button {
             background: #c9ada7;
@@ -77,6 +98,11 @@
             background: #22223b;
             color: #fff;
         }
+        .success-message {
+            margin-top: 16px;
+            color: #4caf50;
+            font-weight: 500;
+        }
         @media (max-width: 600px) {
             header h1 { font-size: 2.5rem; }
             main { padding: 0 8px; }
@@ -86,28 +112,33 @@
 </head>
 <body>
     <header>
-        <h1 style="cursor:pointer; margin:0; font-size:14vw; letter-spacing:2px; font-weight:700;">
-            <a href="index.html" style="color:inherit; text-decoration:none; display:inline-block; width:100%; height:100%;">SKIPPY</a>
-        </h1>
+        <h1><a href="index.html" style="color:inherit; text-decoration:none;">SKIPPY</a></h1>
         <nav>
-            <a href="#">Welcome</a>
+            <a href="welcome.html">Welcome</a>
             <a href="index.html">Musées</a>
             <a href="billets.html">Billets</a>
-            <a href="contact.html">Contact</a>
+            <a href="#">Contact</a>
         </nav>
     </header>
     <main>
-        <h2 style="color:#22223b; font-size:2rem; margin-top:32px; margin-bottom:16px;">Welcome to Skippy</h2>
-        <p style="color:#4a4e69; font-size:1.1rem; margin-bottom:32px;">Skippy is your gateway to the wonders of Paris. We are dedicated to making your cultural journey seamless, inspiring, and unforgettable.<br><br>Our platform allows you to discover, search, and access the most iconic museums and historical sites in Paris with ease. Don't skip the experience, skip the hassle—Skippy brings the city’s rich heritage to your fingertips.</p>
-        <div style="display:flex; justify-content:center;">
-            <ul class="browser-default" style="text-align:left; color:#22223b; font-size:1.1rem; font-weight:500; padding-left:24px; list-style-type:disc; max-width:400px;">
-                <li>Fast and easy reservations</li>
-                <li>Priority access to top attractions</li>
-                <li>Modern, intuitive interface</li>
-                <li>Responsive customer support</li>
-            </ul>
-        </div>
-        <a class="button" href="index.html">Explore Paris Attractions</a>
+        <h2>Contact Us</h2>
+        <form id="contact-form" autocomplete="off">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" required>
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+            <label for="message">Message</label>
+            <textarea id="message" name="message" required></textarea>
+            <button class="button" type="submit">Send Message</button>
+        </form>
+        <div id="form-success" class="success-message" style="display:none;">Thank you for contacting us! We'll get back to you soon.</div>
+        <script>
+            document.getElementById('contact-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                document.getElementById('form-success').style.display = 'block';
+                document.getElementById('contact-form').reset();
+            });
+        </script>
     </main>
 </body>
 </html>
