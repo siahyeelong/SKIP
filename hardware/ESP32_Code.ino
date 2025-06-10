@@ -1,6 +1,7 @@
 #include <WiFi.h>
 #include <PubSubClient.h> // Include the MQTT library
 
+
 // --- Your Hotspot Wi-Fi Credentials ---
 const char* ssid = "Monkey";
 const char* password = "poggers101";
@@ -32,6 +33,12 @@ int ultEchoPin = 5;
 float dist = 0;
 
 char payloadToSend[128];
+
+int attraction_id = 1;
+
+bool sensors = false;
+
+char date[24];
 
 void setup() {
   Serial.begin(115200);
@@ -109,38 +116,92 @@ void loop() {
   }
   client.loop(); // MUST be called frequently to maintain connection and process messages
 
-  // --- Publishing Logic ---
-  long startTime = millis(); // Record the start time of the loop
-  btnPresses =0;
-  while (millis() - startTime < duration) {
-    // Code inside this loop will execute for approximately 15 seconds
-    if(!digitalRead(btnPin)){
-      btnPresses++;
+  if(sensors){
+    // --- Publishing Logic ---
+    long startTime = millis(); // Record the start time of the loop
+    btnPresses =0;
+    while (millis() - startTime < duration) {
+      // Code inside this loop will execute for approximately 15 seconds
+      if(!digitalRead(btnPin)){
+        btnPresses++;
+      }
+      delay(100); // Another small delay example
     }
-    delay(100); // Another small delay example
+
+      // --- Serial Command Handling ---
+    if (Serial.available() > 0) {
+      String input = Serial.readStringUntil('\n'); // Read input until newline
+      input.trim(); // Remove any whitespace
+      int id = input.toInt(); // Convert to integer
+      if (id >= 1 && id <= 30) {
+        attraction_id = id;
+        Serial.print("Attraction ID updated to: ");
+        Serial.println(attraction_id);
+      } else {
+        Serial.println("Invalid input. Please enter a number between 1 and 30.");
+      }
+    }
+
+    Serial.print("Number of People Entered In Last 15 Seconds: ");
+    Serial.print(btnPresses);
+    Serial.print("\n");
+
+    //get distance
+    
+    dist = getDistance();
+
+    sprintf(payloadToSend, "{\"attraction_id\": %d, \"count\": %d, \"distance\": %.2f}", attraction_id, btnPresses, dist);
+
+    Serial.print("Publishing message: \"");
+    Serial.print(payloadToSend);
+    Serial.print("\" to topic: ");
+    Serial.println(mqtt_publish_topic);
+
+    if (client.publish(mqtt_publish_topic, payloadToSend)) {
+      Serial.println("Message published successfully.");
+    } else {
+      Serial.print("Failed to publish message. MQTT state: ");
+      Serial.println(client.state());
+    }
+
+
+  }else{
+          // --- Serial Command Handling ---
+    // if (Serial.available() > 0) {
+    //   String input = Serial.readStringUntil('\n'); // Read input until newline
+    //   input.trim(); // Remove any whitespace
+    //   int id = input.toInt(); // Convert to integer
+    //   if (id >= 1 && id <= 30) {
+    //     attraction_id = id;
+    //     Serial.print("Attraction ID updated to: ");
+    //     Serial.println(attraction_id);
+    //   } else {
+    //     Serial.println("Invalid input. Please enter a number between 1 and 30.");
+    //   }
+    // }
+    attraction_id = random(1,31);
+    dist = random(25000,40000) / 100.0;
+    btnPresses = random (11,21);
+    int hour = random(9,19);
+    int minute = random(0,61);
+    float second = (random(0, 60000) / 1000.0);
+    sprintf(date, "2025-06-10 %d:%d:%.3f", hour, minute, second);
+    sprintf(payloadToSend, "{\"attraction_id\": %d, \"count\": %d, \"distance\": %.2f, \"timestamp\": \"%s\"}", attraction_id, btnPresses, dist, date);
+    
+
+    Serial.print("Publishing message: \"");
+    Serial.print(payloadToSend);
+    Serial.print("\" to topic: ");
+    Serial.println(mqtt_publish_topic);
+
+    if (client.publish(mqtt_publish_topic, payloadToSend)) {
+      Serial.println("Message published successfully.");
+    } else {
+      Serial.print("Failed to publish message. MQTT state: ");
+      Serial.println(client.state());
+    }
+    delay(1000);
   }
-
-  Serial.print("Number of People Entered In Last 15 Seconds: ");
-  Serial.print(btnPresses);
-  Serial.print("\n");
-
-  //get distance
-  dist = getDistance();
-
-  sprintf(payloadToSend, "{\"attraction_id\": 5, \"count\": %d, \"distance\": %.2f}", btnPresses, dist);
-
-  Serial.print("Publishing message: \"");
-  Serial.print(payloadToSend);
-  Serial.print("\" to topic: ");
-  Serial.println(mqtt_publish_topic);
-
-  if (client.publish(mqtt_publish_topic, payloadToSend)) {
-    Serial.println("Message published successfully.");
-  } else {
-    Serial.print("Failed to publish message. MQTT state: ");
-    Serial.println(client.state());
-  }
-  
   
   // The client.connected() check in loop and subsequent reconnect()
   // largely covers Wi-Fi stability for MQTT. Removing the redundant ESP.restart().

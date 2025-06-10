@@ -43,6 +43,7 @@ Our prototype is built with the following
 | Joseph Downs  | @Jtime2   |
 
 ### TODO list
+- implement the refresh
 - add buy tickets inside each dialog
 - highlight colour of wait time chart
 - make the interface mobile friendly

@@ -11,7 +11,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet" />
     <!-- Custom Style -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
+    <!-- Add these before your closing </head> tag -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         body {
             margin: 0;
@@ -38,10 +40,13 @@
 
         nav {
             margin-top: 12px;
+            background-color: #b191b2;
+            display: flex;
+            justify-content: center;
         }
 
         nav a {
-            color: #c9ada7;
+            color: #e3f6fe;
             text-decoration: none;
             margin: 0 18px;
             font-weight: 600;
@@ -50,7 +55,12 @@
         }
 
         nav a:hover {
-            color: #9a8c98;
+            color: #994a8d;
+        }
+
+        .sidenav-trigger {
+            display: flex;
+            align-items: center;
         }
 
         main {
@@ -81,9 +91,97 @@
                 font-size: 2rem;
             }
 
+            nav {
+                flex-direction: column;
+                align-items: stretch;
+                ;
+            }
+
+            nav a {
+                display: block;
+                margin: 12px 0;
+                font-size: 1rem;
+                padding: 12px
+            }
+
             main {
                 padding: 0 8px;
             }
+
+            .input-field,
+            select {
+                width: 100%;
+            }
+
+            #sort-waittime-btn {
+                width: 40%;
+                box-sizing: border-box;
+            }
+
+            #map-list-btn {
+                width: 40%;
+                box-sizing: border-box;
+            }
+
+            #attraction-cards>div {
+                flex-direction: row;
+                align-items: center;
+            }
+
+            #attraction-cards img {
+                width: 40%;
+                height: auto;
+            }
+
+            #attraction-cards h3 {
+                font-size: 1.25rem;
+            }
+        }
+
+        /* make card-container responsive */
+        .card-container {
+            border: 1px solid #c9ada7;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-left-container {
+            display: flex;
+            align-items: center;
+            width: 80%;
+            gap: 16px;
+        }
+
+        .card-image {
+            width: 20%;
+            height: 20%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            color: #22223b;
+            margin: 0 0 8px 0;
+        }
+
+        .card-description {
+            color: #4a4e69;
+            font-size: 1rem;
+            margin: 0;
+        }
+
+        .card-waittime {
+            font-size: 1rem;
+            color: #9a8c98;
+            font-weight: 700;
+            text-align: right;
+            width: 20%;
         }
     </style>
 </head>
@@ -91,16 +189,32 @@
 <body>
     <header>
         <h1>SKIPPY</h1>
+        <!-- Navbar -->
         <nav>
-            <a href="welcome.html">Welcome</a>
-            <a href="#">Musées</a>
-            <a href="billets.html">Billets</a>
-            <a href="contact.html">Contact</a>
+            <div>
+                <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+                <ul class="hide-on-med-and-down">
+                    <li><a href="welcome.html">Welcome</a></li>
+                    <li><a href="#">Musées</a></li>
+                    <li><a href="billets.html">Billets</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </div>
         </nav>
+
+        <!-- Mobile Sidenav -->
+        <ul class="sidenav" id="mobile-demo">
+            <li><a href="welcome.html">Welcome</a></li>
+            <li><a href="#">Musées</a></li>
+            <li><a href="billets.html">Billets</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+
+
     </header>
 
     <main>
-        <h2>Historical Sites of Paris</h2>
+        <h2>Tourist Attractions in Paris</h2>
         <div class="input-field">
             <input type="text" id="attraction-search" class="autocomplete" placeholder="Type to search..." />
             <label for="attraction-search">Search for a site</label>
@@ -113,6 +227,12 @@
             <i class="material-icons left">filter_list</i>
             <span id="sort-label">
                 Sort by Wait Time
+            </span>
+        </a>
+        <a id="map-list-btn" class="waves-effect waves-light btn right" style="margin-top: 40px;">
+            <i class="material-icons right">map</i>
+            <span id="sort-label">
+                Map View
             </span>
         </a>
 
@@ -148,6 +268,7 @@
                     cursor:pointer;
                     color: rgb(190, 4, 4);
                 ">&times;</button>
+                <div id="map-container" style="height: 400px; width: 100%; display: none;"></div>
                 <img id="modal-image" src="" alt=""
                     style="width:100%;height:auto;border-radius:8px;max-height:300px;object-fit:cover;">
                 <h2 id="modal-title" style="margin-top:16px;"></h2>
@@ -169,6 +290,13 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
+        let sortByWaitTime = false;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var elems = document.querySelectorAll('.sidenav');
+            M.Sidenav.init(elems);
+        });
+
         document.addEventListener('DOMContentLoaded', function () {
             const searchInput = document.getElementById('attraction-search');
             const dropdown = document.getElementById('attraction-dropdown');
@@ -177,96 +305,158 @@
             let waitTimeChart = null;
 
 
+            const loadMap = () => {
+                document.getElementById('attraction-cards').style.display = 'none';
+
+                let mapContainer = document.getElementById('main-map-container');
+                if (!mapContainer) {
+                    mapContainer = document.createElement('div');
+                    mapContainer.id = 'main-map-container';
+                    mapContainer.style.cssText = 'height: 600px; width: 100%; margin-top: 40px; border-radius: 12px; overflow: hidden;';
+
+                    const cardsContainer = document.getElementById('attraction-cards');
+                    cardsContainer.parentNode.insertBefore(mapContainer, cardsContainer);
+                }
+
+                mapContainer.style.display = 'block';
+
+                const map = L.map('main-map-container').setView([48.8566, 2.3522], 12);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(map);
+
+                allAttractions.forEach(attraction => {
+                    const mockLat = 48.8566 + (Math.random() - 0.5) * 0.05;
+                    const mockLng = 2.3522 + (Math.random() - 0.5) * 0.05;
+
+                    const marker = L.marker([mockLat, mockLng]).addTo(map);
+                    marker.bindPopup(`<b>${attraction.name}</b><br>${formatTime(attraction.waittime) || 'No wait time data'}`);
+
+                    marker.on('click', () => {
+                        showModal(attraction);
+                    });
+                });
+            };
+
             const modal = document.getElementById('modal');
             const modalClose = document.getElementById('modal-close');
+            const backendURL = "http://innovatinsa.piwio.fr:3004/attractions/";
+            const refreshInterval = 10000; // 10 seconds
 
-            fetch('http://innovatinsa.piwio.fr:3004/attractions/')
-                .then(res => res.json())
-                .then(data => {
-                    allAttractions = data;
-                    const dataMap = {};
-                    data.sort((a, b) => a.name.localeCompare(b.name)); // Sort by name
-                    data.forEach(attraction => {
-                        dataMap[attraction.name] = null; // Materialize expects { "Key": null }
-                        const option = document.createElement('option');
-                        option.value = attraction.name;
-                        option.textContent = attraction.name;
-                        dropdown.appendChild(option);
-                        populateCards(data);
-                    });
 
-                    M.Autocomplete.init(searchInput, {
-                        data: dataMap,
-                        minLength: 1,
-                        onAutocomplete: function (val) {
-                            // Optional: do something on selection
-                            dropdown.value = val;
+            // load the first time then load every 10 seconds
+            const loadAllAttractions = () => {
+                fetch(backendURL)
+                    .then(res => res.json())
+                    .then(data => {
+                        allAttractions = data;
+                        const dataMap = {};
+                        data.sort((a, b) => a.name.localeCompare(b.name)); // Sort by name
+
+                        data.sort((a, b) => {
+                            if (sortByWaitTime) {
+                                return (a.waittime ?? Infinity) - (b.waittime ?? Infinity);
+                            } else {
+                                return a.name.localeCompare(b.name);
+                            }
+                        });
+
+                        document.getElementById('sort-label').textContent = sortByWaitTime
+                            ? 'Sort by Name'
+                            : 'Sort by Wait Time';
+
+                        data.forEach(attraction => {
+                            dataMap[attraction.name] = null; // Materialize expects { "Key": null }
+                            const option = document.createElement('option');
+                            option.value = attraction.name;
+                            option.textContent = attraction.name;
+                            dropdown.appendChild(option);
+                            populateCards(data);
+                        });
+
+                        M.Autocomplete.init(searchInput, {
+                            data: dataMap,
+                            minLength: 1,
+                            onAutocomplete: function (val) {
+                                // Optional: do something on selection
+                                dropdown.value = val;
+                            }
+                        });
+                    })
+                    .catch(err => console.error('Error loading attractions:', err));
+
+                document.getElementById('sort-waittime-btn').addEventListener('click', () => {
+                    sortByWaitTime = !sortByWaitTime;
+
+                    const sorted = [...allAttractions].sort((a, b) => {
+                        if (sortByWaitTime) {
+                            return (a.waittime ?? Infinity) - (b.waittime ?? Infinity);
+                        } else {
+                            return a.name.localeCompare(b.name);
                         }
                     });
-                })
-                .catch(err => console.error('Error loading attractions:', err));
 
-            let sortByWaitTime = false;
+                    document.getElementById('sort-label').textContent = sortByWaitTime
+                        ? 'Sort by Name'
+                        : 'Sort by Wait Time';
 
-            document.getElementById('sort-waittime-btn').addEventListener('click', () => {
-                sortByWaitTime = !sortByWaitTime;
+                    populateCards(sorted);
+                });
 
-                const sorted = [...allAttractions].sort((a, b) => {
-                    if (sortByWaitTime) {
-                        return (a.waittime ?? Infinity) - (b.waittime ?? Infinity);
+                let mapView = false;
+
+                document.getElementById('map-list-btn').addEventListener('click', () => {
+                    mapView = !mapView;
+
+                    if (mapView) {
+                        document.getElementById('attraction-cards').style.display = 'none';
+                        document.getElementById('map-list-btn').innerHTML = '<i class="material-icons right">list</i> List View';
+                        loadMap();
                     } else {
-                        return a.name.localeCompare(b.name);
+                        document.getElementById('attraction-cards').style.display = 'block';
+                        const mapContainer = document.getElementById('main-map-container');
+                        if (mapContainer) {
+                            mapContainer.style.display = 'none';
+                        }
+                        document.getElementById('map-list-btn').innerHTML = '<i class="material-icons right">map</i> Map View';
                     }
                 });
 
-                document.getElementById('sort-label').textContent = sortByWaitTime
-                    ? 'Sort by Name'
-                    : 'Sort by Wait Time';
+            }
 
-                populateCards(sorted);
-            });
-
-
+            loadAllAttractions();
+            // Refresh data every 10 seconds
+            setInterval(() => {
+                loadAllAttractions();
+                console.log('Data refreshed');
+            }, refreshInterval);
 
             function populateCards(attractions) {
 
                 cardsContainer.innerHTML = '';
                 attractions.forEach((attraction, index) => {
                     const card = document.createElement('div');
-                    card.style.border = '1px solid #c9ada7';
-                    card.style.borderRadius = '12px';
-                    card.style.marginBottom = '24px';
-                    card.style.padding = '16px';
-                    card.style.display = 'flex';
-                    card.style.alignItems = 'center';
-                    card.style.justifyContent = 'space-between';
-                    card.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)';
+                    card.className = 'card-container';
 
                     // Left side: image + text
                     const leftContainer = document.createElement('div');
-                    leftContainer.style.display = 'flex';
-                    leftContainer.style.alignItems = 'center';
-                    leftContainer.style.gap = '16px';
+                    leftContainer.className = 'card-left-container';
 
                     const img = document.createElement('img');
                     const imagePath = `./assets/${attraction.id}.jpg`;
                     img.src = imagePath;
                     img.alt = attraction.name;
-                    img.style.width = '120px';
-                    img.style.height = '80px';
-                    img.style.objectFit = 'cover';
-                    img.style.borderRadius = '8px';
+                    img.className = 'card-image';
 
                     const textContainer = document.createElement('div');
                     const title = document.createElement('h3');
                     title.textContent = attraction.name;
-                    title.style.margin = '0 0 8px 0';
-                    title.style.color = '#22223b';
+                    title.className = 'card-title';
 
                     const desc = document.createElement('p');
                     desc.textContent = attraction.description;
-                    desc.style.margin = '0';
-                    desc.style.color = '#4a4e69';
+                    desc.className = 'card-description';
 
                     textContainer.appendChild(title);
                     textContainer.appendChild(desc);
@@ -277,11 +467,8 @@
                     // Right side: number
                     const waitTime = document.createElement('div');
                     let waitTimeText = formatTime(attraction.waittime);
-                    // waitTime.style.fontSize = '2.5rem';
                     waitTime.textContent = waitTimeText;
-                    waitTime.style.fontWeight = '700';
-                    waitTime.style.color = '#9a8c98';
-                    waitTime.style.marginLeft = '20px';
+                    waitTime.className = 'card-waittime';
 
                     card.appendChild(leftContainer);
                     card.appendChild(waitTime);
@@ -294,8 +481,6 @@
                     cardsContainer.appendChild(card);
                 });
             }
-
-
 
             dropdown.addEventListener('change', () => {
                 const selectedName = dropdown.value;
@@ -314,7 +499,6 @@
                 }
             });
 
-
             function showModal(attraction) {
                 const modal = document.getElementById('modal');
                 document.getElementById('modal-image').src = `./assets/${attraction.id}.jpg`;
@@ -326,7 +510,7 @@
 
                 let hours = [];
                 let historicalWaitTime = [];
-                fetch(`http://innovatinsa.piwio.fr:3004/attractions/${attraction.id}/history`)
+                fetch(`${backendURL}/${attraction.id}/history`)
                     .then(response => response.json())
                     .then(data => {
                         const averageTimes = averageWaitTimesByHour(data)
@@ -407,7 +591,7 @@
                 data.forEach(entry => {
                     const timestamp = new Date(entry.timestamp);
                     const hour = timestamp.getUTCHours(); // or getHours() if timestamps are local
-                    const hourKey = hour < 10 ? `0${hour}00` : `${hour}00`;
+                    const hourKey = hour < 10 ? `0${hour}:00` : `${hour}:00`;
 
                     if (entry.waittime !== null) {
                         if (!hourlyData[hourKey]) {

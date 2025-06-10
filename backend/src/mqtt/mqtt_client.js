@@ -24,12 +24,12 @@ mqttClient.on('connect', () => {
         "attraction_id": 5,
         "count": 22,
         "distance": 100
+        "timestamp": "2025-12-31 23:59:59.999"
         }
  */
 mqttClient.on('message', async (topic, message) => {
     try {
         const jsonMessage = JSON.parse(message.toString());
-        jsonMessage.timestamp = new Date().toISOString();
 
         if (!jsonMessage.attraction_id || !jsonMessage.distance || !jsonMessage.count) {
             console.error(chalk.red('Invalid message format:', jsonMessage));
@@ -43,7 +43,10 @@ mqttClient.on('message', async (topic, message) => {
         const waitTime = Math.ceil((maxCapacity - jsonMessage.distance * standingDensity) / (jsonMessage.count*4));
 
         console.log(chalk.yellow(`Received message: ${JSON.stringify(jsonMessage)}`));
-        await query('INSERT INTO measurements (attraction_id, waittime) VALUES ($1, $2)', [jsonMessage.attraction_id, waitTime]);
+        let result = await query('INSERT INTO measurements (attraction_id, waittime) VALUES ($1, $2) RETURNING id', [jsonMessage.attraction_id, waitTime]);
+        if (jsonMessage.timestamp) {
+            await query(`UPDATE measurements SET timestamp = $1 WHERE id = $2`, [jsonMessage.timestamp, result.rows[0].id]);
+        }
         console.log(chalk.green(`Wait time inserted into database`));
         await query(`UPDATE attractions SET waittime = $1 WHERE id = $2`, [waitTime, jsonMessage.attraction_id]);
         console.log(chalk.green('Current wait time updated in database'));
