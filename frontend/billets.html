@@ -35,7 +35,9 @@
 
         nav {
             margin-top: 12px;
-            background-color: #c295c3;
+            background-color: #b191b2;
+            display: flex;
+            justify-content: center;
         }
 
         nav a {
@@ -55,6 +57,11 @@
             max-width: 800px;
             margin: 40px auto 0 auto;
             padding: 0 20px;
+        }
+
+        .sidenav-trigger {
+            display: flex;
+            align-items: center;
         }
 
         h2 {
@@ -101,6 +108,19 @@
                 font-size: 2.5rem;
             }
 
+            nav {
+                flex-direction: column;
+                align-items: stretch;
+                ;
+            }
+
+            nav a {
+                display: block;
+                margin: 12px 0;
+                font-size: 1rem;
+                padding: 12px
+            }
+
             main {
                 padding: 0 8px;
             }
@@ -115,12 +135,26 @@
 <body>
     <header>
         <h1><a href="index.html" style="color:inherit; text-decoration:none;">SKIPPY</a></h1>
+        <!-- Navbar -->
         <nav>
-            <a href="welcome.html">Welcome</a>
-            <a href="index.html">Musées</a>
-            <a href="#">Billets</a>
-            <a href="contact.html">Contact</a>
+            <div>
+                <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+                <ul class="hide-on-med-and-down">
+                    <li><a href="welcome.html">Welcome</a></li>
+                    <li><a href="index.html">Musées</a></li>
+                    <li><a href="#">Billets</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </div>
         </nav>
+
+        <!-- Mobile Sidenav -->
+        <ul class="sidenav" id="mobile-demo">
+            <li><a href="welcome.html">Welcome</a></li>
+            <li><a href="index.html">Musées</a></li>
+            <li><a href="#">Billets</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
     </header>
     <main>
         <h2>Paris Museum Tickets</h2>
@@ -152,6 +186,13 @@
             </li>
         </ul>
     </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var elems = document.querySelectorAll('.sidenav');
+            M.Sidenav.init(elems);
+        });
+    </script>
 </body>
 
 </html>

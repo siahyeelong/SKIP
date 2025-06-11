@@ -217,8 +217,6 @@
             <li><a href="billets.html">Billets</a></li>
             <li><a href="contact.html">Contact</a></li>
         </ul>
-
-
     </header>
 
     <main>
@@ -299,6 +297,7 @@
 
     <script>
         let sortByWaitTime = false;
+        let mapView = false;
 
         document.addEventListener('DOMContentLoaded', function () {
             var elems = document.querySelectorAll('.sidenav');
@@ -311,11 +310,14 @@
             const cardsContainer = document.getElementById('attraction-cards');
             let allAttractions = [];
             let waitTimeChart = null;
+            let map = null;
 
+            const modal = document.getElementById('modal');
+            const modalClose = document.getElementById('modal-close');
+            const backendURL = "http://innovatinsa.piwio.fr:3004/attractions/";
+            const refreshInterval = 10000; // 10 seconds
 
             const loadMap = () => {
-                document.getElementById('attraction-cards').style.display = 'none';
-
                 let mapContainer = document.getElementById('main-map-container');
                 if (!mapContainer) {
                     mapContainer = document.createElement('div');
@@ -326,34 +328,41 @@
                     cardsContainer.parentNode.insertBefore(mapContainer, cardsContainer);
                 }
 
-                mapContainer.style.display = 'block';
+                if (!map) {
+                    map = L.map('main-map-container').setView([48.8582, 2.3418], 13);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '&copy; OpenStreetMap contributors'
+                    }).addTo(map);
+                }
 
-                const map = L.map('main-map-container').setView([48.8582, 2.3418], 13);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: '&copy; OpenStreetMap contributors'
-                }).addTo(map);
+                map.eachLayer(layer => {
+                    if (layer instanceof L.Marker) {
+                        map.removeLayer(layer);
+                    }
+                });
 
                 allAttractions.forEach(attraction => {
-                    const marker = L.marker([attraction.lat, attraction.long]).addTo(map);
-                    marker.bindPopup(`<img class="map-image" src="./assets/${attraction.id}.jpg" alt="${attraction.name}"><br><b>${attraction.name}</b><br>${formatTime(attraction.waittime)}`);
-                    marker.on('mouseover', function (e) {
-                        this.openPopup();
-                    });
-                    marker.on('mouseout', function (e) {
-                        this.closePopup();
-                    });
-                    marker.on('click', () => {
-                        showModal(attraction);
-                    });
+                    if (attraction.lat && attraction.long) {
+                        const marker = L.marker([attraction.lat, attraction.long]).addTo(map);
+                        marker.bindPopup(`<img class="map-image" src="./assets/${attraction.id}.jpg" alt="${attraction.name}"><br><b>${attraction.name}</b><br>${formatTime(attraction.waittime)}`);
+                        marker.on('mouseover', function (e) {
+                            this.openPopup();
+                        });
+                        marker.on('mouseout', function (e) {
+                            this.closePopup();
+                        });
+                        marker.on('click', () => {
+                            showModal(attraction);
+                        });
+                    }
                 });
+
+                // Force map to resize after it's visible
+                setTimeout(() => {
+                    map.invalidateSize();
+                }, 100);
             };
-
-            const modal = document.getElementById('modal');
-            const modalClose = document.getElementById('modal-close');
-            const backendURL = "http://innovatinsa.piwio.fr:3004/attractions/";
-            const refreshInterval = 10000; // 10 seconds
-
 
             // load the first time then load every 10 seconds
             const loadAllAttractions = () => {
@@ -395,45 +404,43 @@
                         });
                     })
                     .catch(err => console.error('Error loading attractions:', err));
+            }
 
-                document.getElementById('sort-waittime-btn').addEventListener('click', () => {
-                    sortByWaitTime = !sortByWaitTime;
 
-                    const sorted = [...allAttractions].sort((a, b) => {
-                        if (sortByWaitTime) {
-                            return (a.waittime ?? Infinity) - (b.waittime ?? Infinity);
-                        } else {
-                            return a.name.localeCompare(b.name);
-                        }
-                    });
-
-                    document.getElementById('sort-label').textContent = sortByWaitTime
-                        ? 'Sort by Name'
-                        : 'Sort by Wait Time';
-
-                    populateCards(sorted);
-                });
-
-                let mapView = false;
-
-                document.getElementById('map-list-btn').addEventListener('click', () => {
-                    mapView = !mapView;
-
-                    if (mapView) {
-                        document.getElementById('attraction-cards').style.display = 'none';
-                        document.getElementById('map-list-btn').innerHTML = '<i class="material-icons right">list</i> List View';
-                        loadMap();
+            document.getElementById('sort-waittime-btn').addEventListener('click', () => {
+                sortByWaitTime = !sortByWaitTime;
+                const sorted = [...allAttractions].sort((a, b) => {
+                    if (sortByWaitTime) {
+                        return (a.waittime ?? Infinity) - (b.waittime ?? Infinity);
                     } else {
-                        document.getElementById('attraction-cards').style.display = 'block';
-                        const mapContainer = document.getElementById('main-map-container');
-                        if (mapContainer) {
-                            mapContainer.style.display = 'none';
-                        }
-                        document.getElementById('map-list-btn').innerHTML = '<i class="material-icons right">map</i> Map View';
+                        return a.name.localeCompare(b.name);
                     }
                 });
+                document.getElementById('sort-label').textContent = sortByWaitTime
+                    ? 'Sort by Name'
+                    : 'Sort by Wait Time';
+                populateCards(sorted);
+            });
+            
 
-            }
+            document.getElementById('map-list-btn').addEventListener('click', () => {
+                mapView = !mapView;
+                if (mapView) {
+                    document.getElementById('attraction-cards').style.display = 'none';
+                    document.getElementById('sort-waittime-btn').style.visibility = 'hidden';
+                    document.getElementById('map-list-btn').innerHTML = '<i class="material-icons right">list</i> List View';
+                    loadMap();
+                    document.getElementById('main-map-container').style.display = 'block';
+                } else {
+                    const mapContainer = document.getElementById('main-map-container');
+                    if (mapContainer) {
+                        mapContainer.style.display = 'none';
+                    }
+                    document.getElementById('attraction-cards').style.display = 'block';
+                    document.getElementById('sort-waittime-btn').style.visibility = 'visible';
+                    document.getElementById('map-list-btn').innerHTML = '<i class="material-icons right">map</i> Map View';
+                }
+            });
 
             loadAllAttractions();
             // Refresh data every 10 seconds

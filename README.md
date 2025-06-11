@@ -34,13 +34,13 @@ Our prototype is built with the following
 
 ## Contributors
 
-| Name          | GitHub       |
-|--------------|---------------|
-| Siah Yee Long      | @siahyeelong       |
-| Szander Brenner     | @SzanderB      |
-| Kabir Gupta   | @kabirbg    |
-| Tochukwu Okonwko | @BSZTHEBEST99  |
-| Joseph Downs  | @Jtime2   |
+| Name          | GitHub       | Role |
+|--------------|---------------|---------------|
+| Siah Yee Long      | @siahyeelong       | Frontend & UI |
+| Szander Brenner     | @SzanderB      | Hardware |
+| Kabir Gupta   | @kabirbg    | Full Stack |
+| Tochukwu Okonwko | @BSZTHEBEST99  | Frontend & UI |
+| Joseph Downs  | @Jtime2   | Project Manager |
 
 ### TODO list
 [x] implement the refresh
