@@ -3,6 +3,7 @@
 
 <head>
     <title>Skippy - Paris Attractions</title>
+    <link rel="icon" type="image/x-icon" href="/assets/skippy logo.png">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Google Fonts -->
@@ -183,6 +184,13 @@
             text-align: right;
             width: 20%;
         }
+
+        .map-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
     </style>
 </head>
 
@@ -320,19 +328,21 @@
 
                 mapContainer.style.display = 'block';
 
-                const map = L.map('main-map-container').setView([48.8566, 2.3522], 12);
+                const map = L.map('main-map-container').setView([48.8582, 2.3418], 13);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     maxZoom: 19,
                     attribution: '&copy; OpenStreetMap contributors'
                 }).addTo(map);
 
                 allAttractions.forEach(attraction => {
-                    const mockLat = 48.8566 + (Math.random() - 0.5) * 0.05;
-                    const mockLng = 2.3522 + (Math.random() - 0.5) * 0.05;
-
-                    const marker = L.marker([mockLat, mockLng]).addTo(map);
-                    marker.bindPopup(`<b>${attraction.name}</b><br>${formatTime(attraction.waittime) || 'No wait time data'}`);
-
+                    const marker = L.marker([attraction.lat, attraction.long]).addTo(map);
+                    marker.bindPopup(`<img class="map-image" src="./assets/${attraction.id}.jpg" alt="${attraction.name}"><br><b>${attraction.name}</b><br>${formatTime(attraction.waittime)}`);
+                    marker.on('mouseover', function (e) {
+                        this.openPopup();
+                    });
+                    marker.on('mouseout', function (e) {
+                        this.closePopup();
+                    });
                     marker.on('click', () => {
                         showModal(attraction);
                     });

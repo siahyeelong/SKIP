@@ -43,9 +43,9 @@ Our prototype is built with the following
 | Joseph Downs  | @Jtime2   |
 
 ### TODO list
-- implement the refresh
-- add buy tickets inside each dialog
-- highlight colour of wait time chart
-- make the interface mobile friendly
-- add geographical location of each attraction and put inside dialog
-- add a map view to see all attractions in map view
+[x] implement the refresh
+[x] add buy tickets inside each dialog
+[x] highlight colour of wait time chart
+[x] make the interface mobile friendly
+[x] add geographical location of each attraction and put inside dialog
+[x] add a map view to see all attractions in map view

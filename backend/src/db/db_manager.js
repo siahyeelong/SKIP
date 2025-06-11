@@ -65,13 +65,15 @@ async function createTables() {
     const attractionsTableQuery = `CREATE TABLE IF NOT EXISTS attractions (
       id SERIAL PRIMARY KEY,
       name VARCHAR NOT NULL,
-      waitTime float,
-      description TEXT
+      waitTime FLOAT,
+      description TEXT,
+      lat FLOAT NOT NULL,
+      long FLOAT NOT NULL
       );
       CREATE TABLE IF NOT EXISTS measurements (
       id SERIAL PRIMARY KEY,
       attraction_id INTEGER NOT NULL REFERENCES attractions(id),
-      waittime float NOT NULL,
+      waittime FLOAT NOT NULL,
       timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );`;
     await client.query(attractionsTableQuery);
