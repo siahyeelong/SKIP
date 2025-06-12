@@ -1,6 +1,6 @@
 # SKIPPY
 
-See More. Wait less.
+See More. Wait less. [[Try out skippy]](https://skippy-kbfx.onrender.com/)
 
 Nobody likes waiting in line, especially when you're travelling and time is of essence. SKIPPY is our solution to a smarter way to plan trips and avoid waiting in long lines. 
 
@@ -41,11 +41,3 @@ Our prototype is built with the following
 | Kabir Gupta   | @kabirbg    | Full Stack |
 | Tochukwu Okonwko | @BSZTHEBEST99  | Frontend & UI |
 | Joseph Downs  | @Jtime2   | Project Manager |
-
-### TODO list
-[x] implement the refresh
-[x] add buy tickets inside each dialog
-[x] highlight colour of wait time chart
-[x] make the interface mobile friendly
-[x] add geographical location of each attraction and put inside dialog
-[x] add a map view to see all attractions in map view
