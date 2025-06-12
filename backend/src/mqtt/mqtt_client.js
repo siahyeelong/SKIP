@@ -40,6 +40,12 @@ mqttClient.on('message', async (topic, message) => {
         // Assumes distance is in meters and count is over 15 seconds
         const maxCapacity = 5000; // Maximum capacity of the attraction
         const standingDensity = 5; // Average number of people per meter
+
+        if (jsonMessage.distance > maxCapacity/standingDensity || jsonMessage.count < 1) {
+            console.error(chalk.red('Not logging invalid data: distance or count out of bounds:', jsonMessage));
+            return;
+        }
+
         const waitTime = Math.ceil((maxCapacity - jsonMessage.distance * standingDensity) / (jsonMessage.count*4));
 
         console.log(chalk.yellow(`Received message: ${JSON.stringify(jsonMessage)}`));
